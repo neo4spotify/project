@@ -1,119 +1,149 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Nov  6 09:01:59 2019
-@author: ALS
-"""
 import spotipy
 import spotipy.util as util
 import os
 import json
 import pandas as pd
 import math
-#mesure de temps
 import time 
-tmps1=time.time()
-# Configuration de l'authentification à l'API Spotify
-clientid='??????'
-clientsec= '????'
-username='??????'
-url='http://localhost:8888/'
-scope = 'user-top-read'
-try:
-    token = util.prompt_for_user_token(username,'user-top-read', client_id=clientid,client_secret=clientsec, redirect_uri=url)
-except (AttributeError, json.decoder.JSONDecodeError):
-    os.remove(f".cache-{username}")
-    token = util.prompt_for_user_token(username,'user-top-read', client_id=clientid,client_secret=clientsec, redirect_uri=url))
-# Authentification par token
-sp = spotipy.client.Spotify(auth=token)
+
+def auth():
+    '''
+    Generate token for authentification for Spotidy API
+    '''
+    clientid='????'
+    clientsec= '????'
+    username='????'
+    url='????'
+    scope = 'user-top-read'
+
+    try:
+        token = util.prompt_for_user_token(username,'user-top-read', client_id=clientid,client_secret=clientsec, redirect_uri=url)
+    except (AttributeError, json.decoder.JSONDecodeError): 
+        os.remove(f".cache-{username}")
+        token = util.prompt_for_user_token(username,'user-top-read', client_id=clientid,client_secret=clientsec, redirect_uri=url)
+    return(token)
+
+# Global variable
+col_artists ='artists'
+col_item='items'
+col_id='id'
+col_genres='genres'
+col_popularity='popularity'
+col_name='name'
+col_related='related'
+limit_related=10
 
 def artist_info(dataset):
+    ''' Based on the name, find ID, popularity and genres of an artist defined by Spotify
+    Arguments: Dataframe including a column "artist_name"
+    Returns : A dataframe with added columns "artist_id", "popularity" and "genres"
     '''
-    Input : Programme qui s'applique à la liste de nom d'artiste extraite du fichier spotify
-    Output : Enrichi le dataframe avec l'id spotify, le genre et la popularité de l'artiste
-    '''
+    global col_artists 
+    global col_item
+    global col_id
+    global col_genres
+    global col_popularity
     for name in dataset.artist_name :
         json=sp.search(q='artist:' + str(name), type='artist')
         row={}
         try:
-            id_find=json['artists']['items'][0]['id']
-            genres_find=json['artists']['items'][0]['genres'] 
-            pop_find=json['artists']['items'][0]['popularity']
+            id_find=json[col_artists ][col_item][0][col_id]
+            genres_find=json[col_artists][col_item][0][col_genres] 
+            pop_find=json[col_artists][col_item][0][col_popularity]
         except:
             id_find= 'NaN'
-        try:
-            row={'artist_id':id_find, 'artist_name':name, 'popularity':pop_find, 'genres':genres_find}
-            dataset= dataset[dataset.artist_name!=name]
-            dataset=dataset.append(row,ignore_index=True)
-        except:
-            print("fail_info")
-    # L'identifiant est essentiel pour les autres requetes
+        row={'artist_id':id_find, 'artist_name':name, 'popularity':pop_find, 'genres':genres_find}
+        dataset= dataset[dataset.artist_name!=name]
+        dataset=dataset.append(row,ignore_index=True)
+    # ID is essential for other spotify queries
     dataset_notNAN=dataset[dataset.artist_id!='NaN']
     return (dataset_notNAN)
     
 def relate_art(artist,dataset): 
+    ''' Add related artists and add new rows for new artists
+    Arguments: The dataframe and the id of an artist on which we're looking for related artists
+    Returns: Dataframe with added column "related" and new rows for related artists not present in the dataframe
     '''
-    Input : Id d'un artiste pour lequel on cherche les artistes similaires
-    Output : Colonne du dataset d'entrée enrichie des artistes similaires + nouvelle lignes pour ces artistes s'ils n'existaient pas
-    '''
-    data = sp.artist_related_artists(artist)
+    global col_artists 
+    global col_id
+    global col_genres
+    global col_popularity
+    global col_name
+    global col_related
+    global limit_related
     list_related = []
     dict_pop = {}
     dict_id = {}
     dict_genre={}
-    for artist_rel in data['artists']:
-        list_related.append(artist_rel['name'])
-        dict_pop[artist_rel['name']] = artist_rel['popularity']
-        dict_id[artist_rel['name']] = artist_rel['id']
-        dict_genre[artist_rel['name']] = artist_rel['genres']
-    dataset.loc[dataset.artist_id==artist,'related'] = str(list_related)
-    
+    data = sp.artist_related_artists(artist)
+    nb=0
+    # Limit of 10 or below related artists for performance
+    while ( (nb < len(data[col_artists])) and (nb < limit_related) ):     
+        dict_pop[data[col_artists][nb][col_name]] = data[col_artists][nb][col_popularity]
+        dict_id[data[col_artists][nb][col_name]] = data[col_artists][nb][col_id]
+        dict_genre[data[col_artists][nb][col_name]] = data[col_artists][nb][col_genres]
+        try:
+            list_related.append(data[col_artists][nb][col_name])
+        except:
+            print(str(data[col_artists][nb][col_name]) + 'no related')
+        nb+=1
+    dataset.loc[dataset.artist_id == artist , col_related] = str(list_related) 
+       
     for artist_rel in list_related:
-        if artist_rel not in list(dataset.artist_name) :
-            new_row={'artist_name':artist_rel,'popularity':dict_pop[artist_rel],'artist_id':dict_id[artist_rel],'genres':dict_genre[artist_rel]}
+        if artist_rel not in dataset.artist_name :
+            new_row={'artist_name':artist_rel, 'popularity':dict_pop[artist_rel], 'artist_id':dict_id[artist_rel], 'genres':dict_genre[artist_rel]}
             dataset = dataset.append(new_row,ignore_index =True) 
     return(dataset)
 
 def complete_related(dataset): 
+    ''' Fullfil "related" column without adding new rows
+    Arguments: Dataframe with some artists whom don't have related artists
+    Returns: Dataframe with every value complete
     '''
-    Si colonne 'related' possède valeur nulle :
-        Rajoute la liste des artistes similaires
-    '''
-    #Séparation en 2 df pour rendre la boucle plus rapide -> Vrai ? 
+    global col_artists 
+    global col_name
+    global col_related
+    global limit_related
+    # Separation into 2 dataframe for optimization 
     to_complete=dataset[dataset.related.isnull()]
     completed=dataset[dataset.related.notnull()]
     for i,artist in to_complete.iterrows():
         data = sp.artist_related_artists(artist.artist_id)
         related_artists = []
-        for artist_rel in data['artists']:
-            related_artists.append(artist_rel['name'])
-        try:
-            to_complete.loc[to_complete.artist_id==artist.artist_id,'related'] = str(related_artists)
-        except:
-            print("fail boucle1")
-        dataset=pd.concat([completed,to_complete],ignore_index=True)
+        nb=0
+        # Limit of 10 or below related artists for performance
+        while ( (nb < len(data[col_artists])) and (nb < limit_related) ): #
+            try:
+                related_artists.append(data[col_artists][nb][col_name])
+            except:
+                related_artists = []
+            nb+=1
+        to_complete.loc[to_complete.artist_id == artist.artist_id , col_related] = str(related_artists)
+    dataset=pd.concat([completed,to_complete],ignore_index=True)
     return(dataset)
 
+    
+if __name__ == '__main__':
+    # Authentification by token
+    token=auth()
+    sp = spotipy.client.Spotify(auth=token)
 
-## __main__ :
-dataset=pd.read_csv("name_sportify_dataset.csv",sep=";", header=0,nrows=10)
-dataset=artist_info(dataset)
-dataset=dataset[dataset.artist_id.notnull()]
-# Choix du degré d'éloignement recherché entre les artistes (changer condition sur iter)
-iter=0
-while iter<1 :  
-    for artist_id in dataset["artist_id"]:
-        dataset= relate_art(artist_id,dataset)
-    iter+=1
-tmps2=time.time()-tmps1
-print(tmps2)
+    tmps1=time.time()
+    dataset=pd.read_csv("./data/name_spotify_dataset.csv",sep=";", header=0,nrows=200)
+    dataset=artist_info(dataset)
+    # iter refers to the degree of distance between artists (for iter=2 -> related of related artists)
+    iter=0
+    while iter<1 :  
+        for artist_id in dataset["artist_id"]:
+            dataset= relate_art(artist_id,dataset)
+        iter+=1
+        
+    dataset.to_csv("./data/df_incomplete.csv",sep=';',index=False,index_label=False,encoding="utf-8")
+    tmps2=time.time()-tmps1
+    print(tmps2)
 
-dataset_complet=complete_related(dataset)
-dataset_complet.to_csv("list_10.csv",sep=';',index=False,index_label=False,encoding="utf-8")
-tmps3=time.time()-tmps1
-print(tmps3)
+    dataset_complet=complete_related(dataset)
+    dataset_complet.to_csv("./data/df_.csv",sep=';',index=False,index_label=False,encoding="utf-8")
+    tmps3=time.time()-tmps1
+    print(tmps3)
 
-
-#from 10rows to 175 = 32sec -> 20sec // 2 boucles-> 1337row = 151sec
-#from 50rows to 755 = 150 sec -> 142sec
-#From 100rows to 1403 = 268 sec (4,5min)
-#From 150rows to 1996 = 52 - 385sec (6,3min)
