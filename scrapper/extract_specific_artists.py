@@ -1,21 +1,33 @@
+# %% libs
 import pandas as pd
-import time 
-tmps1=time.time()
-df = pd.read_csv("../data/df_200x2iter.csv",sep=";")
+import os
+# %% Constants
+COL_ARTIST = ' "artistname"'
+OUTPUT_PATH = "data/chunks.csv"
+# %% ETL init
 
-chksize, n = 10000, 40000
-reader = pd.read_csv("spotify_dataset.csv",sep=',', header=0, chunksize=chksize, error_bad_lines=False, nrows=n)
+if os.path.exists(OUTPUT_PATH):
+    os.remove(OUTPUT_PATH)
 
-df_result=pd.DataFrame()
-list_name=list(df.artist_name)
+df = pd.read_csv("data/df_200x2iter.csv", sep=";")
 
-i=1
-for chunk in reader :
-    mask = (chunk[' "artistname"'] in list_name).all(out=True , axis=1)
-    df_result=chunk[mask]
-    df_result.to_csv("../data/chunks.csv",sep=';',mode='a',index=False,index_label=False)
-    print(i)
-    i+=1
-      
-tmps2=time.time()-tmps1
-print(f"for {n/chksize} chunks: {itmps2} sec")
+chksize = 10000
+reader = pd.read_csv("scrapper/spotify_dataset.csv", sep=',',
+                     header=0, chunksize=chksize, error_bad_lines=False)
+
+list_name = list(df.artist_name)
+
+i = 1
+# %%
+for chunk in reader:
+
+    df_result = chunk[chunk[COL_ARTIST].isin(list_name)]
+    df_result.to_csv(OUTPUT_PATH, sep=';', mode='a',
+                     index=(i == 0), index_label=False)
+    print(f"iteration number {i}")
+    i += 1
+    if i>450:
+        break
+
+
+# %%
