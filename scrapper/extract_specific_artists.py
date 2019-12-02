@@ -28,6 +28,4 @@ for chunk in reader:
     i += 1
     if i>450:
         break
-
-
 # %%
