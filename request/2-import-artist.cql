@@ -9,3 +9,9 @@ LOAD CSV WITH HEADERS FROM 'file:///artists.csv'
     // MERGE (u)-[:LISTEN_TO]->(s)
     // MERGE (p)-[:CONTAINS]->(s)
     // MERGE (a)-[:PLAYS]->(s)
+
+
+Elvis Costello;2BGRfQgtzikz1pzAD0kaEn;
+['art rock', 'dance rock', 'folk', 'folk rock', 'mellow gold', 'new wave pop', 'permanent wave', 'power pop', 'pub rock', 'rock', 'roots rock', 'singer-songwriter'];
+60.0;
+['Elvis Costello & The Attractions', 'Squeeze', 'Joe Jackson', 'Nick Lowe', 'Graham Parker', 'XTC', 'Elvis Costello & The Imposters', 'Marshall Crenshaw', 'Graham Parker & The Rumour', 'Big Star']
