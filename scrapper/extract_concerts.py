@@ -8,11 +8,11 @@ import urllib.parse
 
 
 # %% Constants
-INPUT_PATH = "data/chunks.csv"
+INPUT_PATH = "data/base.csv"
 OUTPUT_PATH = "data/concerts.csv"
 # %% Read artists
 df = pd.read_csv(INPUT_PATH, sep=";")
-artists = df[' "artistname"'].unique()
+artists = df['artist_name'].unique()
 
 # %% Def functions
 
@@ -74,11 +74,12 @@ def scrapArtist(responses):
 
 
 # %% build requests
+df = pd.DataFrame([], columns=["artist", "date",
+                               "nom_concert", "endroit", "ville"])
 for chunk in chunks(artists, 20):
     start = time.time()
     urls = []
-    df = pd.DataFrame([], columns=["artist", "date",
-                                   "nom_concert", "endroit", "ville"])
+
     for artist in chunk:
         u = f"https://www.concertarchives.org/concerts?utf8=%E2%9C%93&search={artist}"
         urls.append(u)
@@ -86,10 +87,9 @@ for chunk in chunks(artists, 20):
     responses = grequests.map(rs)
     print(time.time()-start)
     artistData = scrapArtist(responses)
-    df = pd.DataFrame([], columns=["artist", "date",
-                                   "nom_concert", "endroit", "ville"])
+    
     artistData = scrapArtist(responses)
     for line in artistData:
         df.loc[len(df)] = line
-    df.to_csv(OUTPUT_PATH, sep='|', mode='a',
-              header=False, index_label=False)
+df.to_csv(OUTPUT_PATH, sep='|', mode='w',
+            header=True, index_label=False)

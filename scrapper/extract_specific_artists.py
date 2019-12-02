@@ -3,7 +3,7 @@ import pandas as pd
 import os
 # %% Constants
 COL_ARTIST = ' "artistname"'
-OUTPUT_PATH = "data/chunks.csv"
+OUTPUT_PATH = "data/base.csv"
 # %% ETL init
 
 if os.path.exists(OUTPUT_PATH):
