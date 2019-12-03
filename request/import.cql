@@ -12,7 +12,7 @@ Requete 6 :
 le nombre d'artiste qui fait a la fois un genre et un autre genre
 
 Requete 7 :
-A partir d'un utilisateur, recuperer la liste des artistes qu'il écoute et retourner la liste des concerts dans lesquels ces artistes joue
+A partir d'un utilisateur, recuperer la liste des artistes qu'il écoute et retourner la liste des concerts (villes) dans lesquels ces artistes joue
 et en retourner 30 
  
 Requete 8 :
