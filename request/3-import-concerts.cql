@@ -7,8 +7,8 @@ LOAD CSV WITH HEADERS FROM 'file:///concerts.csv'
 
     MERGE (c:Concert {
         date: ligne.date,
-        nom_concert: ligne.nom_concert,
-        salle_concert: ligne.endroit,
-        ville: ligne.ville
+        nom_concert: ligne.nom_concert
         })
+    SET c.salle_concert= ligne.endroit
+    SET c.ville= ligne.ville
     MERGE (a)-[:PLAYS_IN]->(c)
