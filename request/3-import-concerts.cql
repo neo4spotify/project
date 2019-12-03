@@ -3,12 +3,12 @@ USING PERIODIC COMMIT 500
 LOAD CSV WITH HEADERS FROM 'file:///concerts.csv'
  	AS ligne FIELDTERMINATOR '|'
     
-    MERGE (a:Artist {artist_name: ligne[1]})
+    MERGE (a:Artist {artist_name: ligne.artist})
 
     MERGE (c:Concert {
-        date: ligne[2],
-        nom_concert: ligne[3],
-        salle_concert: ligne[4],
-        ville: ligne[5]
+        date: ligne.date,
+        nom_concert: ligne.nom_concert,
+        salle_concert: ligne.endroit,
+        ville: ligne.ville
         })
     MERGE (a)-[:PLAYS_IN]->(c)

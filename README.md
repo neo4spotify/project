@@ -1,7 +1,7 @@
-# project
+# Neo4Spotify
 Neo4J database to modelize songs relations
 
-![](./NeoModel.png)
+![](./images/NeoModel.png)
 
 Parmi les requêtes à réaliser, nous avons pensé à :
 * Un pageRank sur les artistes afin de trouver les plus importants
