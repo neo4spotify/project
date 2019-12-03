@@ -4,14 +4,6 @@ import fichier df_200x2iter.csv
 import fichier chunks.csv
 import fichier concerts.csv
 
-Requete 2 :
-Un pageRank (fonction de Neo4j) sur les artistes afin de trouver les plus importants (Limit 50 par ex)
-
-Requete 3 :
-les 30 playlists les plus écoutées avec le nombre d'écoute
-
-Requete 4 :
-les genres les plus joués
 
 Requete 5 :
 Le pourcentage de chanson dans le genre d'un artiste
