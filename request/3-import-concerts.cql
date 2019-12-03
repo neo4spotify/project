@@ -1,6 +1,6 @@
 // Import file concerts.csv
 USING PERIODIC COMMIT 500
-LOAD CSV FROM 'file:///concerts.csv'
+LOAD CSV WITH HEADERS FROM 'file:///concerts.csv'
  	AS ligne FIELDTERMINATOR '|'
     
     MERGE (a:Artist {artist_name: ligne[1]})

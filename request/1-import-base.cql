@@ -1,5 +1,5 @@
 // Import file base.csv
-USING PERIODIC COMMIT 500
+USING PERIODIC COMMIT 1000
 LOAD CSV WITH HEADERS FROM 'file:///base.csv'
  	AS ligne FIELDTERMINATOR ';'
     
