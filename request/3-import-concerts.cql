@@ -10,5 +10,6 @@ LOAD CSV WITH HEADERS FROM 'file:///concerts.csv'
         nom_concert: ligne.nom_concert
         })
     SET c.salle_concert= ligne.endroit
-    SET c.ville= ligne.ville
+    MERGE(v:Ville {ville_name: ligne.ville})
     MERGE (a)-[:PLAYS_IN]->(c)
+    MERGE (c)-[:IS_IN]->(v)
