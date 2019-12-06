@@ -2,7 +2,7 @@
 
 
 <p align="center">
-  <img align="right" src="images/logo.png" />
+  <img align="right" src="images/logo.PNG" />
 </p>
 
 ## Introduction
@@ -845,7 +845,7 @@ WHERE g.genre_name="folk-pop"
             MATCH (g:Genre) WHERE g.genre_name IN ["folk-pop", "indietronica","escape room"]
             RETURN DISTINCT a, g
 ```
-![](./images/graphGenreArtists.png)
+![](./images/graphGenreArtists.PNG)
 
 ## Conclusion
 
@@ -854,4 +854,4 @@ Ce travail aura été très interessant sur plusieurs aspects.
 * Il nous aura permis de jouer avec Neo4J, de mieux en comprendre le fonctionnement et de pratiquer le langage CQL (Cypher Query Language)
 * Nous avons utilisé Neo4J tel qu'il pourrait être utilisé dans le cadre de notre métier et nous sommes familiarisé avec le wrapper python
 * Nous avons réalisé des visualisations interessantes et appris à utiliser la librairie GeoPandas pour visualiser des données géographiques.
-![.](./images/logo.png)
+![.](./images/logo.PNG)
